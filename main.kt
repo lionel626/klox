@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import com.craftinginterpreters.lox.Token
 
 var hadError : Boolean= false;
 
