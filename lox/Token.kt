@@ -6,4 +6,7 @@ class Token(type : TokenType,lexeme : String, literal : Any, line : Int) {
     final val literal : Any = literal;
     final val line : Int = line;
 
+    public override fun toString() : String {
+        return type.toString() + " " + lexeme + " " + literal;
+    }
 }
