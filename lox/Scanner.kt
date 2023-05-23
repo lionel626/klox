@@ -5,7 +5,7 @@ class Scanner(source: String) {
     final val tokens: MutableList<Token> = mutableListOf()
     final var start = 0
     final var current = 0
-    final val line = 0
+    final var line = 0
 
     fun scanTokens(): List<Token> {
         while (!isAtEnd()) {
@@ -40,10 +40,64 @@ class Scanner(source: String) {
             '=' -> addToken(if (match('=')) TokenType.EQUAL_EQUAL else TokenType.EQUAL)
             '<' -> addToken(if (match('=')) TokenType.LESS_EQUAL else TokenType.LESS)
             '>' -> addToken(if (match('=')) TokenType.GREATER_EQUAL else TokenType.GREATER)
+            '/' -> {
+                if (match('/')) {
+                    // A comment goes until the end of the line.
+                    while (peek() != '\n' && !isAtEnd()) advance()
+                } else {
+                    addToken(TokenType.SLASH)
+                }
+            }
+            "\""[0] -> string()
             else -> {
-                error(line, "Unexpected character.")
+                if (isDigit(c)) {
+                    number()
+                } else {
+                    error(line, "Unexpected character.")
+                }
             }
         }
+    }
+
+    private fun isDigit(c: Char): Boolean {
+        return c >= '0' && c <= '9'
+    }
+
+    private fun number() {
+        while (isDigit(peek())) advance()
+
+        // Look for a fractional part.
+        if (peek() == '.' && isDigit(peekNext())) {
+            // Consume the "."
+            advance()
+
+            while (isDigit(peek())) advance()
+        }
+        addToken(TokenType.NUMBER, source.substring(start, current).toDouble())
+    }
+
+    private fun peekNext() : Char {
+        if (current + 1 >= source.length) return Char.MIN_VALUE;
+        return source[current + 1];
+      }
+
+    private fun string() {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') line++
+            advance()
+        }
+
+        if (isAtEnd()) {
+            error(line, "Unterminated string.")
+            return
+        }
+
+        // The closing ".
+        advance()
+
+        // Trim the surrounding quotes.
+        val value: String = source.substring(start + 1, current - 1)
+        addToken(TokenType.STRING, value)
     }
 
     private fun match(expected: Char): Boolean {
@@ -52,6 +106,12 @@ class Scanner(source: String) {
 
         current++
         return true
+    }
+
+    private fun peek(): Char {
+        if (isAtEnd()) return Char.MIN_VALUE
+
+        return source[current]
     }
 
     private fun advance(): Char {
