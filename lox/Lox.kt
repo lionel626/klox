@@ -5,12 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import com.craftinginterpreters.lox.Token
+import kotlin.system.exitProcess
+
 //
 var hadError : Boolean= false;
 
 fun report(line:Int,where:String,message:String) {
-    error("[line "+line+"] Error"+ where+":"+message);
+    error("[line $line] Error$where:$message");
     hadError = true;
 }
 
@@ -29,14 +30,14 @@ fun run(source:String) {
 fun runFile(path:String) {
     val bytes = Files.readAllBytes(Paths.get(path));
     run(String(bytes,Charsets.UTF_8));
-    if (hadError) System.exit(65);
+    if (hadError) exitProcess(65);
 }
 
 fun runPrompt() {
-    val input : InputStreamReader = InputStreamReader(System.in);
+    val input : InputStreamReader = InputStreamReader(System.`in`);
     val reader : BufferedReader = BufferedReader(input);
 
-    for (;;) {
+    while (true) {
         print("> ");
         val line = reader.readLine();
         if(line==null) break;

@@ -1,11 +1,37 @@
 package com.craftinginterpreters.lox
 
+
+
 class Scanner(source: String) {
     final val source: String = source
     final val tokens: MutableList<Token> = mutableListOf()
     final var start = 0
     final var current = 0
     final var line = 0
+
+    
+
+    companion object {
+        private final val keywords : Map<String, TokenType> = mapOf(
+            "and" to TokenType.AND,
+            "class" to TokenType.CLASS,
+            "else" to TokenType.ELSE,
+            "false" to TokenType.FALSE,
+            "for" to TokenType.FOR,
+            "fun" to TokenType.FUN,
+            "if" to     TokenType.IF,
+            "nil" to    TokenType.NIL,
+            "or" to     TokenType.OR,
+            "print" to  TokenType.PRINT,
+            "return" to TokenType.RETURN,
+            "super" to  TokenType.SUPER,
+            "this" to   TokenType.THIS,
+            "true" to   TokenType.TRUE,
+            "var" to    TokenType.VAR,
+            "while" to  TokenType.WHILE,
+        );
+        
+    }
 
     fun scanTokens(): List<Token> {
         while (!isAtEnd()) {
@@ -44,14 +70,19 @@ class Scanner(source: String) {
                 if (match('/')) {
                     // A comment goes until the end of the line.
                     while (peek() != '\n' && !isAtEnd()) advance()
+                }else if (match('*')) {
+                    while (peek() != '*' && peekNext() != '/' && !isAtEnd()) advance()
                 } else {
                     addToken(TokenType.SLASH)
                 }
             }
-            "\""[0] -> string()
+            '"' -> string()
+            ' ' -> null
             else -> {
                 if (isDigit(c)) {
                     number()
+                } else if (isAlpha(c)) {
+                    identifier()
                 } else {
                     error(line, "Unexpected character.")
                 }
@@ -59,8 +90,26 @@ class Scanner(source: String) {
         }
     }
 
+    private fun isAlpha(c:Char) : Boolean {
+        return (c >= 'a' && c <= 'z') ||
+               (c >= 'A' && c <= 'Z') ||
+                c == '_';
+      }
+    
+      private fun isAlphaNumeric( c:Char) : Boolean {
+        return isAlpha(c) || isDigit(c);
+      }
+
+    private fun identifier() {
+        while (isAlphaNumeric(peek())) advance();
+        val text = source.substring(start, current);
+        var type = keywords[text];
+        if (type == null) type = TokenType.IDENTIFIER;
+        addToken(type);
+      }
+
     private fun isDigit(c: Char): Boolean {
-        return c >= '0' && c <= '9'
+        return c in '0'..'9'
     }
 
     private fun number() {
