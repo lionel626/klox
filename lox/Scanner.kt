@@ -67,11 +67,20 @@ class Scanner(source: String) {
             '<' -> addToken(if (match('=')) TokenType.LESS_EQUAL else TokenType.LESS)
             '>' -> addToken(if (match('=')) TokenType.GREATER_EQUAL else TokenType.GREATER)
             '/' -> {
-                if (match('/')) {
+
+                if (match('*')) {
+
+                    while (!isAtEnd()) {
+                        if (peek()=='*' && peekNext()=='/') {
+                            advance()
+                            advance()
+                            break
+                        }
+                        advance()
+                    }
+                } else if (match('/')) {
                     // A comment goes until the end of the line.
                     while (peek() != '\n' && !isAtEnd()) advance()
-                }else if (match('*')) {
-                    while (peek() != '*' && peekNext() != '/' && !isAtEnd()) advance()
                 } else {
                     addToken(TokenType.SLASH)
                 }
