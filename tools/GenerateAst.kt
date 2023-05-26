@@ -13,7 +13,7 @@ private fun defineAst(
     val writer = PrintWriter(File(path))
     writer.println("package com.craftinginterpreters.lox")
     writer.println()
-    writer.println("import java.util.*")
+    //writer.println("import java.util.*")
     writer.println()
     writer.println("abstract class $baseName {")
 
@@ -52,9 +52,21 @@ private fun defineType(
     writer: PrintWriter, baseName: String,
     className: String, fieldList: String
 ) {
+    val fields = fieldList.split(',')
+    var fieldsStr = ""
+    var first = false;
+    for (field in fields) {
+        if (first) {
+            fieldsStr = fieldsStr + ','
+        } else {
+            first = true
+        }
+        fieldsStr = fieldsStr + "val " + field.split(':')[0] + ':' + field.split(':')[1];
+
+    }
     writer.println(
         "    data class " + className + "(" +
-                fieldList + ") : " + baseName + " {"
+                fieldsStr + ") : " + baseName + "() {"
     )
 
     // Visitor pattern.
@@ -74,7 +86,7 @@ fun main(args: Array<String>) {
     defineAst(outputDir, "Expr", Arrays.asList(
         "Binary   -> left : Expr, operator : Token, right : Expr",
         "Grouping -> expression : Expr",
-        "Literal  -> value : Object",
+        "Literal  -> value : Any",
         "Unary    -> operator : Token, right : Expr"
     ));
 }
