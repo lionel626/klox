@@ -1,27 +1,29 @@
 package com.craftinginterpreters.lox
 
+import com.craftinginterpreters.lox.lox.Expr
+
 
 internal class AstPrinter : Expr.Visitor<String?> {
-    fun print(expr: Expr): String {
+    fun print(expr: Expr): String? {
         return expr.accept(this)
     }
 
-    fun visitBinaryExpr(expr: Binary): String? {
+    override fun visitBinaryExpr(expr: Expr.Binary): String? {
         return parenthesize(
             expr.operator.lexeme,
             expr.left, expr.right
         )
     }
 
-    fun visitGroupingExpr(expr: Grouping): String? {
+    override fun visitGroupingExpr(expr: Expr.Grouping): String? {
         return parenthesize("group", expr.expression)
     }
 
-    fun visitLiteralExpr(expr: Literal): String? {
+    override fun visitLiteralExpr(expr: Expr.Literal): String? {
         return if (expr.value == null) "nil" else expr.value.toString()
     }
 
-    fun visitUnaryExpr(expr: Unary): String? {
+    override fun visitUnaryExpr(expr: Expr.Unary): String? {
         return parenthesize(expr.operator.lexeme, expr.right)
     }
 
@@ -39,14 +41,14 @@ internal class AstPrinter : Expr.Visitor<String?> {
 }
 
 fun main(args: Array<String>) {
-    val expression: Expr = Binary(
-        Unary(
+    val expression: Expr = Expr.Binary(
+        Expr.Unary(
             Token(TokenType.MINUS, "-", null, 1),
-            Literal(123)
+            Expr.Literal(123)
         ),
         Token(TokenType.STAR, "*", null, 1),
-        Grouping(
-            Literal(45.67)
+        Expr.Grouping(
+            Expr.Literal(45.67)
         )
     )
 
