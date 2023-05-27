@@ -1,6 +1,8 @@
 
 package com.craftinginterpreters.lox;
 
+import com.craftinginterpreters.lox.lox.Interpreter
+import com.craftinginterpreters.lox.lox.RuntimeError
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.file.Files
@@ -10,6 +12,7 @@ import kotlin.system.exitProcess
 
 //
 var hadError : Boolean= false;
+var hadRuntimeError : Boolean = false;
 
 fun report(line:Int,where:String,message:String) {
     error("[line $line] Error$where:$message");
@@ -28,6 +31,16 @@ fun error(token: Token, message: String?) {
     }
 }
 
+fun runtimeError(error: RuntimeError) {
+    System.err.println(
+        """
+            ${error.message}
+            [line ${error.token.line}]
+            """.trimIndent()
+    )
+    hadRuntimeError = true
+}
+
 fun run(source:String) {
     val scanner : Scanner  = Scanner(source);
     val tokens : List<Token> = scanner.scanTokens();
@@ -43,12 +56,16 @@ fun run(source:String) {
     //for (token in tokens) {
     //    println(token);
     //}
+
+    val interpreter = Interpreter()
+    interpreter.interpret(expression);
 }
 
 fun runFile(path:String) {
     val bytes = Files.readAllBytes(Paths.get(path));
     run(String(bytes,Charsets.UTF_8));
     if (hadError) exitProcess(65);
+    if (hadRuntimeError) exitProcess(70);
 }
 
 fun runPrompt() {
