@@ -27,6 +27,13 @@ internal class AstPrinter : Expr.Visitor<String?> {
         return parenthesize(expr.operator.lexeme, expr.right)
     }
 
+    override fun visitTernaryExpr(ternary: Expr.Ternary): String? {
+        return ("ternary_if(" + ternary.left.accept(this)
+            + ", "
+            + ternary.middle.accept(this)
+            + " ," + ternary.right.accept(this) + " )")
+    }
+
     private fun parenthesize(name: String, vararg exprs: Expr): String? {
         val builder = StringBuilder()
         builder.append("(").append(name)
@@ -73,6 +80,12 @@ internal class RpnAstPrinter : Expr.Visitor<String?> {
         }
         builder.append(")")
         return builder.toString()
+    }
+    override fun visitTernaryExpr(ternary: Expr.Ternary): String? {
+        return ("ternary_if(" + ternary.left.accept(this)
+                + ", "
+                + ternary.middle.accept(this)
+                + " ," + ternary.right.accept(this) + " )")
     }
 
 }

@@ -83,10 +83,12 @@ fun main(args: Array<String>) {
 
     val path = Paths.get("").toAbsolutePath().toString()
     val outputDir = path
-    defineAst(outputDir, "Expr", Arrays.asList(
+    defineAst(outputDir, "Expr", listOf(
         "Binary   -> left : Expr, operator : Token, right : Expr",
         "Grouping -> expression : Expr",
         "Literal  -> value : Any?",
-        "Unary    -> operator : Token, right : Expr"
-    ));
+        "Unary    -> operator : Token, right : Expr",
+        "Ternary  -> left : Expr, operator : Token, middle : Expr, operator1 : Token, left : Expr"
+    )
+    );
 }
