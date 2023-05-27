@@ -9,17 +9,23 @@ class Parser(tokens:List<Token>) {
 
     private class ParseError : RuntimeException()
 
-
+    fun parse(): Expr? {
+        return try {
+            expression()
+        } catch (error: ParseError) {
+            null
+        }
+    }
     private fun expression() : Expr {
         return equality();
     }
 
     private fun equality() : Expr {
-        var expr = comparaison()
+        var expr = comparison()
 
         while (match(TokenType.BANG_EQUAL,TokenType.EQUAL_EQUAL)) {
             val operator = previous();
-            val right = comparaison();
+            val right = comparison();
             expr = Expr.Binary(expr, operator, right)
         }
 
@@ -65,7 +71,7 @@ class Parser(tokens:List<Token>) {
         return primary()
     }
 
-    private fun primary(): Expr? {
+    private fun primary(): Expr {
         if (match(TokenType.FALSE)) return Expr.Literal(false)
         if (match(TokenType.TRUE)) return Expr.Literal(true)
         if (match(TokenType.NIL)) return Expr.Literal(null)
@@ -77,17 +83,33 @@ class Parser(tokens:List<Token>) {
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return Expr.Grouping(expr)
         }
-        return Expr.Literal(0);
+
+        throw error(peek(), "Expect expression")
+        return Expr.Literal(null);
     }
 
-    private fun consume(type: TokenType, message: String): Token? {
+    private fun consume(type: TokenType, message: String): Token {
         if (check(type)) return advance()
         throw error(peek(), message)
     }
 
-    private fun error(token: Token, message: String): ParseError? {
-        error(token, message)
+    private fun error(token: Token, message: String): Throwable {
+        com.craftinginterpreters.lox.error(token, message)
         return ParseError()
+    }
+
+    private fun synchronize() {
+        advance()
+        while (!isAtEnd()) {
+            if (previous().type === TokenType.SEMICOLON) return
+            when (peek().type) {
+                TokenType.CLASS, TokenType.FUN, TokenType.VAR, TokenType.FOR, TokenType.IF, TokenType.WHILE, TokenType.PRINT, TokenType.RETURN -> return
+                else -> {
+
+                }
+            }
+            advance()
+        }
     }
 
     private fun match(vararg types: TokenType): Boolean {
@@ -104,20 +126,20 @@ class Parser(tokens:List<Token>) {
         return if (isAtEnd()) false else peek().type === type
     }
 
-    private fun advance(): Token? {
+    private fun advance(): Token {
         if (!isAtEnd()) current++
         return previous()
     }
 
     private fun isAtEnd(): Boolean {
-        return peek().type === EOF
+        return peek().type === TokenType.EOF
     }
 
     private fun peek(): Token {
         return tokens[current]
     }
 
-    private fun previous(): Token? {
+    private fun previous(): Token {
         return tokens[current - 1]
     }
 

@@ -1,11 +1,12 @@
 
 package com.craftinginterpreters.lox;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.nio.file.Files
+import java.nio.file.Paths
 import kotlin.system.exitProcess
+
 
 //
 var hadError : Boolean= false;
@@ -19,12 +20,29 @@ fun error(line:Int,message:String) {
     report(line,"",message);
 }
 
+fun error(token: Token, message: String?) {
+    if (token.type === TokenType.EOF) {
+        report(token.line, " at end", message!!)
+    } else {
+        report(token.line, " at '" + token.lexeme + "'", message!!)
+    }
+}
+
 fun run(source:String) {
     val scanner : Scanner  = Scanner(source);
     val tokens : List<Token> = scanner.scanTokens();
-    for (token in tokens) {
-        println(token);
-    }
+    val parser = Parser(tokens)
+    val expression = parser.parse()
+
+    // Stop if there was a syntax error.
+
+    // Stop if there was a syntax error.
+    if (hadError) return
+
+    println(AstPrinter().print(expression!!))
+    //for (token in tokens) {
+    //    println(token);
+    //}
 }
 
 fun runFile(path:String) {

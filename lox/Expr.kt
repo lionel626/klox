@@ -22,7 +22,7 @@ abstract class Expr {
             return visitor.visitGroupingExpr(this)
         }
     }
-    data class Literal(val value : Any) : Expr() {
+    data class Literal(val value : Any?) : Expr() {
 
         override fun <R> accept(visitor: Visitor<R>): R {
             return visitor.visitLiteralExpr(this)

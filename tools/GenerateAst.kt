@@ -86,7 +86,7 @@ fun main(args: Array<String>) {
     defineAst(outputDir, "Expr", Arrays.asList(
         "Binary   -> left : Expr, operator : Token, right : Expr",
         "Grouping -> expression : Expr",
-        "Literal  -> value : Any",
+        "Literal  -> value : Any?",
         "Unary    -> operator : Token, right : Expr"
     ));
 }
