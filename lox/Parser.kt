@@ -17,7 +17,21 @@ class Parser(tokens:List<Token>) {
         }
     }
     private fun expression() : Expr {
-        return equality();
+        return ternary();
+    }
+
+    private fun ternary(): Expr {
+        var expr = equality();
+        if (match(TokenType.QUESTION_MARK)) {
+            val op1 = previous()
+            val second = equality()
+            if (match(TokenType.DOT_DOT)) {
+                val op2 = previous()
+                val third = equality()
+                expr = Expr.Ternary(expr,op1,second,op2,third);
+            }
+        }
+        return expr
     }
 
     private fun equality() : Expr {
@@ -61,6 +75,7 @@ class Parser(tokens:List<Token>) {
         }
         return expr
     }
+
 
     private fun unary(): Expr {
         if (match(TokenType.BANG, TokenType.MINUS)) {
